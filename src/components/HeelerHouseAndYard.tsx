@@ -5,61 +5,15 @@ import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier
 import { useGameStore } from '../store/gameStore';
 import {
   OUTDOOR_MAT_POSITION,
-  BACKYARD_SCALE,
-  BACKYARD_CENTER_Z,
 } from '../constants/zones';
 
 export const TRAMPOLINE_POSITION: [number, number, number] = [-6.8, 0.0, 7.6];
 export const TRAMPOLINE_RADIUS = 1.55;
 
-/**
- * The explorable backyard map (backyard.glb, Meshopt-compressed — drei's useGLTF
- * decodes it). Auto-scaled by BACKYARD_SCALE, floor-aligned to Y=0, centered on
- * BACKYARD_CENTER_Z, and wrapped in a trimesh collider so its fence/walls are solid.
- */
-const BackyardMap: React.FC = () => {
-  const { scene } = useGLTF('/models/environment/backyard.glb');
-  const { clone, scale, offset } = useMemo(() => {
-    const c = scene.clone(true);
-    c.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        const m = obj as THREE.Mesh;
-        m.castShadow = true;
-        m.receiveShadow = true;
-      }
-    });
-    const box = new THREE.Box3().setFromObject(c);
-    const s = BACKYARD_SCALE;
-    const centerX = ((box.min.x + box.max.x) / 2) * s;
-    const centerZ = ((box.min.z + box.max.z) / 2) * s;
-    const floorY = box.min.y * s;
-    return { clone: c, scale: s, offset: [-centerX, -floorY, -centerZ] as [number, number, number] };
-  }, [scene]);
-
-  return (
-    <group position={[0, 0, BACKYARD_CENTER_Z]}>
-      {/* Ground collider (simple box — fast, no trimesh cooking issues). Top surface at Y=0 matches the floor-aligned backyard GLB. */}
-      <RigidBody type="fixed" colliders={false} friction={0.9}>
-        <CuboidCollider args={[20, 0.1, 20]} position={[0, -0.1, 0]} />
-      </RigidBody>
-
-      {/* Backyard visual (Meshopt GLB, floor-aligned to Y=0, no physics mesh — the box collider above handles walking) */}
-      <group scale={[scale, scale, scale]} position={offset}>
-        <primitive object={clone} />
-      </group>
-    </group>
-  );
-};
-
-/**
- * Outdoor zones: front yard + house + street + trampoline (OUTDOOR_YARD),
- * and the fenced explorable backyard map (BACKYARD). The walkable interior is a
- * separate map (HeelerHouseInterior) shown when INDOOR_HOUSE.
- */
 export const HeelerHouseAndYard: React.FC = () => {
   const { scene } = useGLTF('/models/environment/heeler_house.glb');
   const currentZone = useGameStore((s) => s.currentZone);
-  const isOutdoor = currentZone !== 'INDOOR_HOUSE';
+  const isOutdoor = currentZone === 'OUTDOOR_YARD';
 
   const { houseClone, autoScale } = useMemo(() => {
     const cloned = scene.clone(true);
@@ -183,18 +137,6 @@ export const HeelerHouseAndYard: React.FC = () => {
         </>
       )}
 
-      {currentZone === 'BACKYARD' && (
-        <>
-          <BackyardMap />
-          {/* Closed-off backyard edges so you can't walk off the map */}
-          <RigidBody type="fixed" colliders={false} friction={0.9}>
-            <CuboidCollider args={[19, 4, 0.6]} position={[0, 2, -34.5]} />
-            <CuboidCollider args={[19, 4, 0.6]} position={[0, 2, -10.5]} />
-            <CuboidCollider args={[0.6, 4, 13]} position={[-19, 2, -22.5]} />
-            <CuboidCollider args={[0.6, 4, 13]} position={[19, 2, -22.5]} />
-          </RigidBody>
-        </>
-      )}
     </group>
   );
 };

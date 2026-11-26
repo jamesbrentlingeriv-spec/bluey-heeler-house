@@ -96,64 +96,24 @@ export const HUD: React.FC = () => {
                 🔄 Switch Character
               </button>
               {currentZone === 'OUTDOOR_YARD' && (
-                <>
-                  <button
-                    type="button"
-                    className="hud-btn btn-sky"
-                    onClick={() => requestZoneChange('INDOOR_HOUSE')}
-                    title="Walk through the front door"
-                  >
-                    🏠 Enter House
-                  </button>
-                  <button
-                    type="button"
-                    className="hud-btn btn-yellow"
-                    onClick={() => requestZoneChange('BACKYARD')}
-                    title="Head around to the backyard"
-                  >
-                    🌿 Go to Backyard
-                  </button>
-                </>
-              )}
-              {currentZone === 'BACKYARD' && (
-                <>
-                  <button
-                    type="button"
-                    className="hud-btn btn-sky"
-                    onClick={() => requestZoneChange('OUTDOOR_YARD')}
-                    title="Return to the front yard"
-                  >
-                    ☀️ Go to Front Yard
-                  </button>
-                  <button
-                    type="button"
-                    className="hud-btn btn-yellow"
-                    onClick={() => requestZoneChange('INDOOR_HOUSE')}
-                    title="Enter through the back door"
-                  >
-                    🏠 Enter House
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className="hud-btn btn-sky"
+                  onClick={() => requestZoneChange('INDOOR_HOUSE')}
+                  title="Walk through the front door"
+                >
+                  🏠 Enter House
+                </button>
               )}
               {currentZone === 'INDOOR_HOUSE' && (
-                <>
-                  <button
-                    type="button"
-                    className="hud-btn btn-sky"
-                    onClick={() => requestZoneChange('OUTDOOR_YARD')}
-                    title="Step out the front door"
-                  >
-                    ☀️ Go Outside
-                  </button>
-                  <button
-                    type="button"
-                    className="hud-btn btn-yellow"
-                    onClick={() => requestZoneChange('BACKYARD')}
-                    title="Step out the back door"
-                  >
-                    🌿 Go to Backyard
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className="hud-btn btn-sky"
+                  onClick={() => requestZoneChange('OUTDOOR_YARD')}
+                  title="Step out the front door"
+                >
+                  ☀️ Go Outside
+                </button>
               )}
               <button
                 type="button"

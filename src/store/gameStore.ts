@@ -12,8 +12,6 @@ import type {
 } from '../types/game';
 import { playBubblePop, setSoundMuted } from '../utils/soundEffects';
 import {
-  BACKYARD_PLAYER_SPAWN,
-  INDOOR_BACKYARD_SPAWN,
   INDOOR_PLAYER_SPAWN,
   OUTDOOR_PLAYER_SPAWN,
 } from '../constants/zones';
@@ -113,7 +111,6 @@ let npcSwatCounter = 1;
 const ZONE_MESSAGES: Record<ZoneName, string> = {
   INDOOR_HOUSE: "Going inside Bluey's house...",
   OUTDOOR_YARD: 'Heading out to the yard...',
-  BACKYARD: 'Heading to the backyard...',
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -254,12 +251,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   interact: () => {
     const state = get();
     if (state.nearDoor) {
-      state.requestZoneChange(
-        state.nearDoor,
-        state.currentZone === 'BACKYARD' && state.nearDoor === 'INDOOR_HOUSE'
-          ? INDOOR_BACKYARD_SPAWN
-          : undefined
-      );
+      state.requestZoneChange(state.nearDoor);
       return;
     }
     state.triggerPlayerSwat();
@@ -270,7 +262,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     const defaultSpawn: Record<ZoneName, [number, number, number]> = {
       INDOOR_HOUSE: INDOOR_PLAYER_SPAWN,
       OUTDOOR_YARD: OUTDOOR_PLAYER_SPAWN,
-      BACKYARD: BACKYARD_PLAYER_SPAWN,
     };
     const spawn =
       state.zoneTransition?.target === target

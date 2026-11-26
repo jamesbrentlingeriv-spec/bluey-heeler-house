@@ -6,11 +6,6 @@ import { TRAMPOLINE_LINES, useGameStore } from '../store/gameStore';
 import { CharacterAvatar } from './CharacterAvatar';
 import { TRAMPOLINE_POSITION, TRAMPOLINE_RADIUS } from './HeelerHouseAndYard';
 import {
-  BACKYARD_ENTRY_Z,
-  BACKYARD_HOUSE_DOOR_POSITION,
-  BACKYARD_PLAYER_SPAWN,
-  FRONT_YARD_REENTRY_Z,
-  INDOOR_BACKYARD_MAT_POSITION,
   INDOOR_MAT_POSITION,
   INDOOR_PLAYER_SPAWN,
   OUTDOOR_MAT_POSITION,
@@ -29,9 +24,7 @@ const DOOR_TARGETS: Record<
   OUTDOOR_YARD: [{ position: OUTDOOR_MAT_POSITION, target: 'INDOOR_HOUSE' }],
   INDOOR_HOUSE: [
     { position: INDOOR_MAT_POSITION, target: 'OUTDOOR_YARD' },
-    { position: INDOOR_BACKYARD_MAT_POSITION, target: 'BACKYARD' },
   ],
-  BACKYARD: [{ position: BACKYARD_HOUSE_DOOR_POSITION, target: 'INDOOR_HOUSE' }],
 };
 
 /**
@@ -227,20 +220,12 @@ export const Player: React.FC = () => {
     }
     setNearDoor(nearestDoor);
 
-    if (currentZone === 'OUTDOOR_YARD' && pos.z < BACKYARD_ENTRY_Z) {
-      setCurrentZone('BACKYARD');
-    } else if (currentZone === 'BACKYARD' && pos.z > FRONT_YARD_REENTRY_Z) {
-      setCurrentZone('OUTDOOR_YARD');
-    }
-
     // Fall safety rescue if ever below -3m
     if (pos.y < -3.0) {
       const rescueSpawn =
         currentZone === 'INDOOR_HOUSE'
           ? INDOOR_PLAYER_SPAWN
-          : currentZone === 'BACKYARD'
-            ? BACKYARD_PLAYER_SPAWN
-            : OUTDOOR_PLAYER_SPAWN;
+          : OUTDOOR_PLAYER_SPAWN;
       bodyRef.current.setTranslation(
         { x: rescueSpawn[0], y: 1.2, z: rescueSpawn[2] },
         true

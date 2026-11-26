@@ -220,12 +220,7 @@ export const KeepyUppyBalloon: React.FC = () => {
     const activeZone = useGameStore.getState().currentZone;
     const bounds = ZONE_BOUNDS[activeZone];
     const outsideCurrentZone =
-      activeZone === 'BACKYARD'
-        ? bPos.x < bounds.minX - 2 ||
-          bPos.x > bounds.maxX + 2 ||
-          bPos.z < bounds.minZ - 2 ||
-          bPos.z > bounds.maxZ + 2
-        : Math.abs(bPos.x) > 16 || bPos.z > 18 || bPos.z < -13;
+      Math.abs(bPos.x) > 16 || bPos.z > 18 || bPos.z < -13;
     if (
       outsideCurrentZone ||
       bPos.y > 14 ||

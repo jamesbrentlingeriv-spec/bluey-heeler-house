@@ -51,7 +51,7 @@ export interface SpeechEntry {
  */
 export type GamePhase = 'MAIN_MENU' | 'CHARACTER_SELECT' | 'ARRIVAL_CUTSCENE' | 'PLAYING';
 
-export type ZoneName = 'OUTDOOR_YARD' | 'INDOOR_HOUSE' | 'BACKYARD';
+export type ZoneName = 'OUTDOOR_YARD' | 'INDOOR_HOUSE';
 
 export type AiLevel = 'NORMAL' | 'SUPER';
 

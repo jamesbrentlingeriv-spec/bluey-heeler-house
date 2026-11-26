@@ -4,7 +4,6 @@ import { useGLTF } from '@react-three/drei';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import { useGameStore } from '../store/gameStore';
 import {
-  INDOOR_BACKYARD_MAT_POSITION,
   INDOOR_MAT_POSITION,
 } from '../constants/zones';
 
@@ -99,17 +98,6 @@ const InteriorMap: React.FC = () => {
       >
         <planeGeometry args={[1.8, 1.0]} />
         <meshBasicMaterial color="#ffd95a" transparent opacity={0.85} />
-      </mesh>
-      <mesh
-        position={[
-          INDOOR_BACKYARD_MAT_POSITION[0],
-          0.012,
-          INDOOR_BACKYARD_MAT_POSITION[2],
-        ]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <planeGeometry args={[1.8, 1.0]} />
-        <meshBasicMaterial color="#78dfff" transparent opacity={0.85} />
       </mesh>
     </group>
   );

@@ -69,12 +69,12 @@ All 8 characters are registered in `public/models/characters/manifest.json` with
 | `src/components/LoadingTransition.tsx` | **New** — ~1.2 s bouncing-red-balloon loading overlay while switching between `OUTDOOR_YARD` and `INDOOR_HOUSE`. |
 | `src/components/MeEasterEgg.tsx` | **New** — secret, non-selectable **"Cody"** avatar (`/models/characters/me.glb`) that drops from off-screen every ~5 min, falls, waves, shows a "I made this game" bubble, then runs off-camera. Timeline constants live at the top of this file. |
 | `src/components/SpeechBubble.tsx` & `src/index.css` | Customize floating 3D comic speech bubble styling (`.cartoon-speech-bubble`), font size, outline thickness, pop-in spring curve, `distanceFactor`, plus menu/select/loading overlay CSS. |
-| `src/components/HeelerHouseAndYard.tsx` | Zone-conditional outdoor `<Sky>`/`<directionalLight>` vs. warm indoor ceiling `<pointLight>`s (`[0, 3.35, -1.6]`, `[-3, 3.25, -3.2]`, `[3, 3.25, -3.2]`); glowing front-door welcome/exit sensor mats (`DoorTriggers`); yard trampoline (`TRAMPOLINE_POSITION`). |
+| `src/components/HeelerHouseAndYard.tsx` | Outdoor front yard + Heeler House GLB (trimesh colliders), fenced play bounds, trampoline, lawn, sidewalk/street. Renders only in `OUTDOOR_YARD` zone. |
 | `src/components/DropOffCutscene.tsx` | Group arrival cutscene (identical for all 8 characters): Destiny drives `destiny_car.glb` with Alex (front) + Marleigh & Callie (back), beeps at the curb, Bluey/Bingo/Bandit/Chilli wave from porch, arrivals hop out, camera blends behind `activeCharacterId`. Tweak timing, wheel spin, camera, dialogue. |
 | `src/components/Player.tsx` | Tune walk/run speeds (`3.5` / `5.6`), jump velocity (`6.1`), coyote time (`165ms`), trampoline bounce (`9.0`), or third-person camera — indoors shortened to `~3.2m` with a Rapier wall-collision raycast. |
 | `src/components/KeepyUppyBalloon.tsx` | Zone-aware floor/respawn (`groundY`), syncs pose to store for NPC AI, handles NPC pass-back swats, upward boop speed, proximity swat reach, 3D star bursts. |
 | `src/components/NpcFamily.tsx` | Keepy Uppy teammate AI: turn-taking closest-NPC chaser (predictive intercept + pass-back with `Run`/`Swat`) plus cheering spectators (`Wave` + bubbles). Zone-aware indoor/outdoor waypoints. |
-| `src/components/HUD.tsx` | Keepy Uppy scoreboard + **Switch Character**, **Enter House / Go Outside**, **AI Helpers: Normal / Super Helpful**, Replay Drop-Off, Sound, Skip Intro buttons. |
+| `src/components/HUD.tsx` | Keepy Uppy scoreboard + **Switch Character**, **Enter House / Go Outside**, **AI Helpers: Normal / Super Helpful**, Replay Drop-Off, Sound, Skip Intro buttons. (Backyard buttons removed — backyard disabled for now.) |
 | `src/utils/soundEffects.ts` | Tweak procedural Web Audio synthesizer tones for the car horn, speech bubble pop, balloon boop pitch progression, jump, or trampoline sproing. |
 
 ---
@@ -95,6 +95,7 @@ All 8 characters are registered in `public/models/characters/manifest.json` with
 ### 3. Entering Bluey's House Interior
 - `currentZone: 'OUTDOOR_YARD' | 'INDOOR_HOUSE'` lives in the store; glowing front-door welcome/exit sensor mats plus an `Enter House` / `Go Outside` HUD button trigger a zone switch.
 - `LoadingTransition.tsx` shows a ~1.2 s cartoon loading screen, then `completeZoneChange` teleports the player, moves the 7 NPCs into the active zone's bounds, respawns the balloon in front of the player (streak preserved), swaps outdoor sunlight ↔ warm indoor `PointLight`s, and shortens the camera spring-arm indoors (`~3.2m` with Rapier wall raycast) so it never clips walls.
+- **Backyard disabled** — the `BACKYARD` zone, `HeelerHouseBackyard.tsx`, and all backyard-related HUD buttons / constants have been removed. Only `OUTDOOR_YARD` ↔ `INDOOR_HOUSE` transitions work.
 
 ### 4. Updated Character Models — Sitting + "Cody" Secret Character
 - The car passengers now **actually sit**: `manifest.json` maps `SitDrive` → `destiny` (`drive`), `alex` (`Chair_Sit_Idle_M`), `marleigh` (`seat`) & `callie` (`seat`), and `DropOffCutscene.tsx` plays `SitDrive` for all four occupants.

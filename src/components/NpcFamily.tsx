@@ -42,16 +42,6 @@ const INDOOR_ZONES: NpcZone[] = [
   { home: [4.0, 0.72, -2.8], waypoints: [[4.0, 0.72, -2.8], [3.4, 0.72, -3.6]] },
 ];
 
-const BACKYARD_ZONES: NpcZone[] = [
-  { home: [-5.0, 0, -19.0], waypoints: [[-5.0, 0, -19.0], [-3.0, 0, -21.0]] },
-  { home: [5.0, 0, -19.5], waypoints: [[5.0, 0, -19.5], [3.0, 0, -21.5]] },
-  { home: [-5.5, 0, -23.5], waypoints: [[-5.5, 0, -23.5], [-3.5, 0, -25.5]] },
-  { home: [4.5, 0, -24.0], waypoints: [[4.5, 0, -24.0], [2.5, 0, -26.0]] },
-  { home: [-4.0, 0, -28.0], waypoints: [[-4.0, 0, -28.0], [-1.5, 0, -29.0]] },
-  { home: [4.0, 0, -28.0], waypoints: [[4.0, 0, -28.0], [1.5, 0, -29.0]] },
-  { home: [0, 0, -24.0], waypoints: [[0, 0, -24.0], [0, 0, -27.0]] },
-];
-
 function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
 }
@@ -106,9 +96,7 @@ export const NpcFamily: React.FC = () => {
   const zones =
     currentZone === 'INDOOR_HOUSE'
       ? INDOOR_ZONES
-      : currentZone === 'BACKYARD'
-        ? BACKYARD_ZONES
-        : OUTDOOR_ZONES;
+      : OUTDOOR_ZONES;
 
   // AI director: assign exactly one (closest) NPC to chase a low balloon.
   useFrame(() => {
