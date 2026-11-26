@@ -54,6 +54,18 @@ export const KeepyUppyBalloon: React.FC = () => {
   const lastHitAtRef = useRef(0);
   const spawnGraceUntilRef = useRef(0);
   const lastHandledNpcSwatRef = useRef(0);
+  // Collision events fire synchronously *inside* Rapier's world.step(); touching a
+  // rigid body there (translation/setLinvel) re-entrantly borrows the WASM world
+  // and panics ("recursive use of an object detected which would lead to unsafe
+  // aliasing in rust"). Queue collision hits and apply them on the next frame,
+  // outside the physics step, instead.
+  const pendingPlayerBoopRef = useRef<{
+    px: number;
+    pz: number;
+    charId: string;
+    charName: string;
+  } | null>(null);
+  const pendingTrampolineRef = useRef(false);
   const [bursts, setBursts] = useState<BurstParticle[]>([]);
 
   const spawnBurst = (pos: THREE.Vector3) => {
@@ -177,9 +189,31 @@ export const KeepyUppyBalloon: React.FC = () => {
   }, [swatTriggerNonce]);
 
   useFrame((frameState) => {
-    if (!bodyRef.current) return;
+    // Only touch the physics body while actually PLAYING. This component stays
+    // mounted across mode changes (it just renders null), but its <RigidBody> is
+    // torn down the moment we leave PLAYING. For a frame, bodyRef can still point
+    // at that removed body, whose WASM handle is invalid — calling translation()
+    // on it panics ("unreachable") and leaves the Rapier world borrowed, which
+    // then makes every following world.step() throw "recursive use of an object".
+    // Gating on the live mode (not just bodyRef) prevents that crash on switch.
+    if (useGameStore.getState().mode !== 'PLAYING' || !bodyRef.current) return;
     const now = performance.now();
     const t = frameState.clock.elapsedTime;
+
+    // Apply queued collision hits OUTSIDE the physics step (see onCollisionEnter).
+    if (pendingTrampolineRef.current) {
+      pendingTrampolineRef.current = false;
+      bodyRef.current.setLinvel(
+        { x: (Math.random() - 0.5) * 1.5, y: 5.2, z: (Math.random() - 0.5) * 1.5 },
+        true
+      );
+    }
+    const pendingBoop = pendingPlayerBoopRef.current;
+    if (pendingBoop) {
+      pendingPlayerBoopRef.current = null;
+      boopBalloonFrom(pendingBoop.px, pendingBoop.pz, pendingBoop.charId, pendingBoop.charName, 1.0);
+    }
+
     const bPos = bodyRef.current.translation();
     const vel = bodyRef.current.linvel();
 
@@ -274,11 +308,17 @@ export const KeepyUppyBalloon: React.FC = () => {
             | { isPlayer?: boolean; isNpc?: boolean; characterId?: string; characterName?: string; isTrampoline?: boolean }
             | undefined;
 
+          // NOTE: Do NOT touch bodyRef here — we are inside Rapier's step. Just queue.
           if (data?.isPlayer && data.characterId && data.characterName) {
             const [px, , pz] = useGameStore.getState().playerPosition;
-            boopBalloonFrom(px, pz, data.characterId, data.characterName, 1.0);
-          } else if (data?.isTrampoline && bodyRef.current) {
-            bodyRef.current.setLinvel({ x: (Math.random() - 0.5) * 1.5, y: 5.2, z: (Math.random() - 0.5) * 1.5 }, true);
+            pendingPlayerBoopRef.current = {
+              px,
+              pz,
+              charId: data.characterId,
+              charName: data.characterName,
+            };
+          } else if (data?.isTrampoline) {
+            pendingTrampolineRef.current = true;
           }
         }}
       >
