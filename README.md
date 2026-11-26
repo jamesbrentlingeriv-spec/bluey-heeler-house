@@ -27,8 +27,10 @@ manifest. A separate maskable 512x512 icon can be added later if desired.
 
 ## Git and large assets
 
-The GLB assets use Git LFS through `.gitattributes`. Install Git LFS before
-staging the project:
+The original Blender source models in `raw models/` use Git LFS through
+`.gitattributes`. Optimized runtime models in `public/models/` are stored as
+regular Git files so Vercel receives the actual GLB data instead of LFS pointer
+files. Install Git LFS to clone or update the source models:
 
 ```sh
 git lfs install
