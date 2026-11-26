@@ -13,6 +13,7 @@ import type {
 import { playBubblePop, setSoundMuted } from '../utils/soundEffects';
 import {
   BACKYARD_PLAYER_SPAWN,
+  INDOOR_BACKYARD_SPAWN,
   INDOOR_PLAYER_SPAWN,
   OUTDOOR_PLAYER_SPAWN,
 } from '../constants/zones';
@@ -87,6 +88,7 @@ interface GameState {
     target: ZoneName,
     spawnPosition?: [number, number, number]
   ) => void;
+  interact: () => void;
   completeZoneChange: (target: ZoneName) => void;
   toggleAiHelpers: () => void;
   triggerSpeech: (
@@ -247,6 +249,20 @@ export const useGameStore = create<GameState>((set, get) => ({
         spawnPosition,
       },
     });
+  },
+
+  interact: () => {
+    const state = get();
+    if (state.nearDoor) {
+      state.requestZoneChange(
+        state.nearDoor,
+        state.currentZone === 'BACKYARD' && state.nearDoor === 'INDOOR_HOUSE'
+          ? INDOOR_BACKYARD_SPAWN
+          : undefined
+      );
+      return;
+    }
+    state.triggerPlayerSwat();
   },
 
   completeZoneChange: (target) => {

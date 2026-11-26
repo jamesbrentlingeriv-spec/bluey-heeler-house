@@ -19,6 +19,7 @@ import { MainMenu } from './components/MainMenu';
 import { CharacterSelect } from './components/CharacterSelect';
 import { LoadingTransition } from './components/LoadingTransition';
 import { MeEasterEgg } from './components/MeEasterEgg';
+import { TouchControls } from './components/TouchControls';
 import { useGameStore } from './store/gameStore';
 
 export const App: React.FC = () => {
@@ -58,6 +59,7 @@ export const App: React.FC = () => {
       <CharacterSelect />
       <LoadingTransition />
       <HUD />
+      <TouchControls />
 
       <Loader
         containerStyles={{

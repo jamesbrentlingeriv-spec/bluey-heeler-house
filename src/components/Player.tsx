@@ -13,13 +13,14 @@ import {
   OUTDOOR_PLAYER_SPAWN,
 } from '../constants/zones';
 import { playJumpSound, playTrampolineBounce } from '../utils/soundEffects';
+import { mobileInput } from '../utils/mobileInput';
 import type { StandardActionKey } from '../types/game';
 
 /**
  * Kid-Friendly Third-Person Character Controller:
  * - WASD / Arrow Keys camera-relative movement, Shift to sprint
  * - Spacebar jump with forgiving 160ms coyote time + automatic trampoline super-bounce
- * - E or Left-Click (on canvas) to Swat the Keepy Uppy balloon
+ * - E to use a nearby doorway or swat; F / left-click always swats the balloon
  * - Smooth third-person camera with drag orbit, scroll zoom, and indoor wall avoidance
  */
 export const Player: React.FC = () => {
@@ -34,6 +35,7 @@ export const Player: React.FC = () => {
   const setPlayerPosition = useGameStore((s) => s.setPlayerPosition);
   const setCurrentZone = useGameStore((s) => s.setCurrentZone);
   const triggerSpeech = useGameStore((s) => s.triggerSpeech);
+  const interact = useGameStore((s) => s.interact);
   const triggerPlayerSwat = useGameStore((s) => s.triggerPlayerSwat);
 
   const activeChar = useMemo(
@@ -91,7 +93,7 @@ export const Player: React.FC = () => {
     cameraPitchRef.current = 0.30;
   }, [mode, selectedCharacterId, spawnPosition]);
 
-  // Trigger swat animation when HUD button or E/Click triggers swatTriggerNonce
+  // Trigger swat animation when a HUD, keyboard, mouse, or touch action swats.
   useEffect(() => {
     if (swatTriggerNonce === 0) return;
     swatUntilRef.current = performance.now() + 520;
@@ -104,7 +106,9 @@ export const Player: React.FC = () => {
       keysRef.current[e.code] = true;
       if (useGameStore.getState().mode !== 'PLAYING') return;
 
-      if (e.code === 'KeyE' || e.code === 'KeyF') {
+      if (e.code === 'KeyE') {
+        interact();
+      } else if (e.code === 'KeyF') {
         triggerPlayerSwat();
       }
       if (e.code === 'Space') {
@@ -174,7 +178,7 @@ export const Player: React.FC = () => {
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
     };
-  }, [gl.domElement, triggerPlayerSwat]);
+  }, [gl.domElement, interact, triggerPlayerSwat]);
 
   useFrame((_, rawDelta) => {
     if (mode !== 'PLAYING' || !bodyRef.current) return;
@@ -217,6 +221,11 @@ export const Player: React.FC = () => {
       lastGroundedAtRef.current = now;
     }
     const canCoyoteJump = now - lastGroundedAtRef.current < 165;
+    const hasBufferedTouchJump =
+      mobileInput.jumpQueuedAt > 0 && now - mobileInput.jumpQueuedAt <= 250;
+    if (mobileInput.jumpQueuedAt > 0 && !hasBufferedTouchJump) {
+      mobileInput.jumpQueuedAt = 0;
+    }
 
     // Trampoline proximity auto-bounce!
     const distToTrampoline = Math.hypot(
@@ -236,12 +245,13 @@ export const Player: React.FC = () => {
       const line = TRAMPOLINE_LINES[Math.floor(Math.random() * TRAMPOLINE_LINES.length)];
       triggerSpeech(activeChar.id, line, 2200, true);
     } else if (
-      (keys['Space'] || keys['KeyK']) &&
+      (keys['Space'] || keys['KeyK'] || hasBufferedTouchJump) &&
       canCoyoteJump &&
       now > jumpCooldownUntilRef.current
     ) {
       jumpCooldownUntilRef.current = now + 340;
       lastGroundedAtRef.current = 0;
+      mobileInput.jumpQueuedAt = 0;
       bodyRef.current.setLinvel({ x: vel.x, y: 6.1, z: vel.z }, true);
       playJumpSound();
     }
@@ -249,13 +259,16 @@ export const Player: React.FC = () => {
     // Movement input in camera-relative horizontal plane
     const forwardInput =
       (keys['KeyW'] || keys['ArrowUp'] ? 1 : 0) -
-      (keys['KeyS'] || keys['ArrowDown'] ? 1 : 0);
+      (keys['KeyS'] || keys['ArrowDown'] ? 1 : 0) +
+      mobileInput.moveForward;
     const rightInput =
       (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0) -
-      (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0);
+      (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0) +
+      mobileInput.moveX;
 
     const isRunning = Boolean(keys['ShiftLeft'] || keys['ShiftRight']);
-    const moveSpeed = isRunning ? 5.6 : 3.5;
+    const inputMagnitude = Math.min(1, Math.hypot(forwardInput, rightInput));
+    const moveSpeed = (isRunning ? 5.6 : 3.5) * inputMagnitude;
 
     const camForward = new THREE.Vector3(
       -Math.sin(cameraYawRef.current),
@@ -272,7 +285,7 @@ export const Player: React.FC = () => {
       .addScaledVector(camForward, forwardInput)
       .addScaledVector(camRight, rightInput);
 
-    const isMoving = moveDir.lengthSq() > 0.01;
+    const isMoving = moveDir.lengthSq() > 0.01 && inputMagnitude > 0.05;
     if (isMoving) {
       moveDir.normalize();
       // Smoothly assist step-up on front porch stairs (Z in [2.3, 4.7], |X| < 1.35)

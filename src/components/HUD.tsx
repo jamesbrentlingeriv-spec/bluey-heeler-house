@@ -3,7 +3,6 @@ import { useGameStore } from '../store/gameStore';
 import {
   BACKYARD_HOUSE_DOOR_POSITION,
   INDOOR_BACKYARD_MAT_POSITION,
-  INDOOR_BACKYARD_SPAWN,
   INDOOR_MAT_POSITION,
   OUTDOOR_MAT_POSITION,
 } from '../constants/zones';
@@ -35,7 +34,7 @@ export const HUD: React.FC = () => {
   const openCharacterSelect = useGameStore((s) => s.openCharacterSelect);
   const toggleAiHelpers = useGameStore((s) => s.toggleAiHelpers);
   const toggleKeepyUppy = useGameStore((s) => s.toggleKeepyUppy);
-  const requestZoneChange = useGameStore((s) => s.requestZoneChange);
+  const interact = useGameStore((s) => s.interact);
   const setNearDoor = useGameStore((s) => s.setNearDoor);
 
   // Only offer door transitions when the player is standing at a doorway.
@@ -105,9 +104,9 @@ export const HUD: React.FC = () => {
                   type="button"
                   className="hud-btn btn-coral"
                   onClick={triggerPlayerSwat}
-                  title="Swat the balloon upward! (E or Click)"
+                  title="Swat the balloon upward! (F or Click)"
                 >
-                  🐾 Swat! (E)
+                  🐾 Swat! (F)
                 </button>
               </div>
             )}
@@ -134,14 +133,7 @@ export const HUD: React.FC = () => {
                 <button
                   type="button"
                   className="hud-btn btn-sky"
-                  onClick={() =>
-                    requestZoneChange(
-                      nearDoor,
-                      currentZone === 'BACKYARD' && nearDoor === 'INDOOR_HOUSE'
-                        ? INDOOR_BACKYARD_SPAWN
-                        : undefined
-                    )
-                  }
+                  onClick={interact}
                   title="Use the nearby doorway"
                 >
                   {nearDoor === 'BACKYARD'
@@ -201,7 +193,7 @@ export const HUD: React.FC = () => {
             {keepyUppyEnabled && (
               <>
                 <span className="dot">•</span>
-                <span><strong>E / Click</strong> Swat Balloon</span>
+                <span><strong>E</strong> Interact / <strong>F / Click</strong> Swat</span>
               </>
             )}
             <span className="dot">•</span>
