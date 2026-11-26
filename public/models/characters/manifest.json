@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "characters": [
+    {
+      "id": "bluey",
+      "name": "Bluey",
+      "role": "kid",
+      "path": "/models/characters/bluey.glb",
+      "nativeHeight": 1.101,
+      "targetHeight": 1.1,
+      "heightScale": 0.9991,
+      "bubbleOffsetY": 1.44,
+      "accentColor": "#579be3",
+      "greetingFromKids": "Yay, yippee! Let's play!",
+      "arrivalLine": "Yay, yippee! Keepy Uppy time!",
+      "npcGreetingTemplate": "Hey {player}! Wanna play Keepy Uppy?",
+      "clips": {
+        "Idle": "Idle",
+        "Walk": "Walk",
+        "Run": "Run",
+        "Jump": "Jump",
+        "Swat": "Swat",
+        "Wave": "Wave"
+      }
+    },
+    {
+      "id": "bingo",
+      "name": "Bingo",
+      "role": "kid",
+      "path": "/models/characters/bingo.glb",
+      "nativeHeight": 0.943,
+      "targetHeight": 0.94,
+      "heightScale": 0.9968,
+      "bubbleOffsetY": 1.28,
+      "accentColor": "#f49752",
+      "greetingFromKids": "Hi Bingo! Yay, yippee!",
+      "arrivalLine": "Wheee! Don't let it touch the ground!",
+      "npcGreetingTemplate": "Hi {player}! Yay, yippee!",
+      "clips": {
+        "Idle": "Idle",
+        "Walk": "Walk",
+        "Run": "Run",
+        "Jump": "Jump",
+        "Swat": "Swat",
+        "Wave": "Wave"
+      }
+    },
+    {
+      "id": "bandit",
+      "name": "Bandit",
+      "role": "adult",
+      "path": "/models/characters/bandit.glb",
+      "nativeHeight": 1.686,
+      "targetHeight": 1.68,
+      "heightScale": 0.9964,
+      "bubbleOffsetY": 2.02,
+      "accentColor": "#3e699c",
+      "greetingFromKids": "Hi Dad! Play Keepy Uppy!",
+      "arrivalLine": "Biscuits! Ready for Keepy Uppy, kids!",
+      "npcGreetingTemplate": "G'day {player}! Ready for Keepy Uppy?",
+      "clips": {
+        "Idle": "Idle",
+        "Walk": "Walk",
+        "Run": "Run",
+        "Jump": "Jump",
+        "Swat": "Swat",
+        "Wave": "Wave"
+      }
+    },
+    {
+      "id": "chilli",
+      "name": "Chilli",
+      "role": "adult",
+      "path": "/models/characters/chilli.glb",
+      "nativeHeight": 1.602,
+      "targetHeight": 1.6,
+      "heightScale": 0.9988,
+      "bubbleOffsetY": 1.94,
+      "accentColor": "#d97b43",
+      "greetingFromKids": "Hi Mum! Watch this!",
+      "arrivalLine": "Hi sweethearts! Let's play!",
+      "npcGreetingTemplate": "Hey there, {player}! Have fun!",
+      "clips": {
+        "Idle": "Idle",
+        "Walk": "Walk",
+        "Run": "Run",
+        "Jump": "Jump",
+        "Swat": "Swat",
+        "Wave": "Wave"
+      }
+    },
+    {
+      "id": "destiny",
+      "name": "Destiny",
+      "role": "destiny",
+      "path": "/models/characters/destiny.glb",
+      "nativeHeight": 1.595,
+      "targetHeight": 1.64,
+      "heightScale": 1.0282,
+      "bubbleOffsetY": 1.98,
+      "accentColor": "#2b8a6e",
+      "greetingFromKids": "Hi Aunt Destiny!",
+      "arrivalLine": "Hey everyone! Let's play!",
+      "npcGreetingTemplate": "Hey {player}! Having a blast?",
+      "clips": {
+        "Idle": "Idle_3",
+        "Walk": "Walking",
+        "Run": "Running",
+        "Jump": "Jump_Over_Obstacle_2_inplace",
+        "Swat": "swat",
+        "Wave": "Wave_One_Hand",
+        "SitDrive": "drive"
+      }
+    },
+    {
+      "id": "alex",
+      "name": "Alex",
+      "role": "adult",
+      "path": "/models/characters/alex.glb",
+      "nativeHeight": 1.621,
+      "targetHeight": 1.72,
+      "heightScale": 1.0611,
+      "bubbleOffsetY": 2.06,
+      "accentColor": "#3b5998",
+      "greetingFromKids": "Hi Uncle Alex!",
+      "arrivalLine": "G'day Bluey! Ready to play!",
+      "npcGreetingTemplate": "G'day {player}! Keep that balloon up!",
+      "clips": {
+        "Idle": "Idle_11",
+        "Walk": "Walking",
+        "Run": "Running",
+        "Jump": "Jump_Over_Obstacle_2_inplace",
+        "Swat": "swat",
+        "Wave": "Wave_One_Hand",
+        "SitDrive": "Chair_Sit_Idle_M"
+      }
+    },
+    {
+      "id": "marleigh",
+      "name": "Marleigh",
+      "role": "kid",
+      "path": "/models/characters/marleigh.glb",
+      "nativeHeight": 1.663,
+      "targetHeight": 1.16,
+      "heightScale": 0.6975,
+      "bubbleOffsetY": 1.5,
+      "accentColor": "#ec6fa7",
+      "greetingFromKids": "Hey Marleigh!",
+      "arrivalLine": "Hi Bluey! Yay, yippee!",
+      "npcGreetingTemplate": "Hey {player}! Come bounce with us!",
+      "clips": {
+        "Idle": "Idle_4",
+        "Walk": "Walking",
+        "Run": "Running",
+        "Jump": "Jump_Over_Obstacle_2_inplace",
+        "Swat": "swat",
+        "Wave": "Idle_4",
+        "SitDrive": "seat"
+      }
+    },
+    {
+      "id": "callie",
+      "name": "Callie",
+      "role": "kid",
+      "path": "/models/characters/callie.glb",
+      "nativeHeight": 1.645,
+      "targetHeight": 0.95,
+      "heightScale": 0.5775,
+      "bubbleOffsetY": 1.29,
+      "accentColor": "#f28cb1",
+      "greetingFromKids": "Hey Callie!",
+      "arrivalLine": "Yay, yippee! Hi Bluey!",
+      "npcGreetingTemplate": "Hi {player}! Yay, yippee!",
+      "clips": {
+        "Idle": "Idle_9",
+        "Walk": "Walking",
+        "Run": "Running",
+        "Jump": "Jump_Over_Obstacle_2_inplace",
+        "Swat": "swat",
+        "Wave": "Wave_One_Hand",
+        "SitDrive": "seat"
+      }
+    }
+  ]
+}
