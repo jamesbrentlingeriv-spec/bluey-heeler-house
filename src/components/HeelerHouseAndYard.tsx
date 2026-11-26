@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { Sky, useGLTF } from '@react-three/drei';
 import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier';
@@ -10,40 +9,20 @@ export const TRAMPOLINE_POSITION: [number, number, number] = [-6.8, 0.0, 7.6];
 export const TRAMPOLINE_RADIUS = 1.55;
 
 /**
- * Glowing welcome mat on the lawn at the base of the front steps. This is purely a
- * visual door indicator — entering the house requires pressing the interact button
- * (E key or the on-screen prompt) while standing near it, NOT auto-teleporting.
+ * Outdoor zones: front yard + house + street + trampoline (OUTDOOR_YARD),
+ * and a fenced explorable backyard (BACKYARD). The walkable interior is a
+ * separate map (HeelerHouseInterior) shown when INDOOR_HOUSE.
  */
-const DoorTriggers: FC = () => (
-  <mesh
-    position={[OUTDOOR_MAT_POSITION[0], 0.015, OUTDOOR_MAT_POSITION[2]]}
-    rotation={[-Math.PI / 2, 0, 0]}
-    receiveShadow
-  >
-    <planeGeometry args={[2.4, 1.3]} />
-    <meshBasicMaterial color="#57d99a" transparent opacity={0.85} />
-  </mesh>
-);
-
-/**
- * Bluey's Heeler House, Walkable Interior, Sunlit Yard, Street & Trampoline.
- * - Wraps normalized heeler_house.glb in <RigidBody type="fixed" colliders="trimesh">
- *   so players walk up the front steps, onto the porch, and inside open rooms.
- * - Pairs warm Brisbane sunlight + sky dome with warm indoor ceiling PointLights.
- * - Includes grassy neighborhood ground fallback collider, front street road, and a bouncy trampoline.
- */
-export const HeelerHouseAndYard: FC = () => {
+export const HeelerHouseAndYard: React.FC = () => {
   const { scene } = useGLTF('/models/environment/heeler_house.glb');
   const currentZone = useGameStore((s) => s.currentZone);
-  const isOutside = currentZone !== 'INDOOR_HOUSE';
+  const isOutdoor = currentZone !== 'INDOOR_HOUSE';
 
   const { houseClone, autoScale } = useMemo(() => {
     const cloned = scene.clone(true);
     const box = new THREE.Box3().setFromObject(cloned);
     const height = Math.max(box.max.y - box.min.y, 0.1);
-    // Normalized in Blender to ~8.23m roof peak for a 1.65m adult; auto-scale safeguard if raw were loaded
     const scale = height < 3.0 ? (1.65 * 5.0) / height : 1.0;
-
     cloned.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
         const mesh = obj as THREE.Mesh;
@@ -56,12 +35,10 @@ export const HeelerHouseAndYard: FC = () => {
 
   return (
     <group>
-      {/* Always-on soft fill so neither zone ever renders pitch black */}
       <ambientLight intensity={0.35} color="#fff9eb" />
 
-      {isOutside && (
+      {isOutdoor && (
         <>
-          {/* Pastel Bluey-style Brisbane sky & warm sunlit outdoor lighting */}
           <Sky
             distance={450}
             sunPosition={[32, 38, 26]}
@@ -87,47 +64,46 @@ export const HeelerHouseAndYard: FC = () => {
             shadow-camera-top={22}
             shadow-camera-bottom={-22}
           />
+
+          <RigidBody type="fixed" colliders={false} friction={0.9}>
+            <CuboidCollider args={[45, 0.25, 45]} position={[0, -0.26, 0]} />
+            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, 21.5]} />
+            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, -30]} />
+            <CuboidCollider args={[0.5, 5, 30]} position={[-22, 4, -4]} />
+            <CuboidCollider args={[0.5, 5, 30]} position={[22, 4, -4]} />
+          </RigidBody>
+
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, -4]} receiveShadow>
+            <planeGeometry args={[110, 130]} />
+            <meshStandardMaterial color="#87cf54" roughness={0.92} />
+          </mesh>
         </>
       )}
 
-      {/* Walkable outdoor Heeler House & Yard with exact trimesh physics */}
-      {isOutside && (
+      {currentZone === 'OUTDOOR_YARD' && (
         <>
           <RigidBody type="fixed" colliders="trimesh" friction={0.85} restitution={0.1}>
             <primitive object={houseClone} scale={[autoScale, autoScale, autoScale]} />
           </RigidBody>
 
-          <DoorTriggers />
-
-          {/* Grassy ground plane fallback collider + neighborhood street & sidewalk */}
-          <RigidBody type="fixed" colliders={false} friction={0.9}>
-            <CuboidCollider args={[45, 0.25, 45]} position={[0, -0.26, 0]} />
-            {/* Invisible neighborhood boundary walls so kids never wander off the world */}
-            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, 21.5]} />
-            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, -37.5]} />
-            <CuboidCollider args={[0.5, 5, 30]} position={[-22, 4, -7.5]} />
-            <CuboidCollider args={[0.5, 5, 30]} position={[22, 4, -7.5]} />
-          </RigidBody>
-
-          {/* Lush surrounding Brisbane hillside grass apron */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
-            <planeGeometry args={[110, 110]} />
-            <meshStandardMaterial color="#87cf54" roughness={0.92} />
+          <mesh
+            position={[OUTDOOR_MAT_POSITION[0], 0.015, OUTDOOR_MAT_POSITION[2]]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            receiveShadow
+          >
+            <planeGeometry args={[2.4, 1.3]} />
+            <meshBasicMaterial color="#57d99a" transparent opacity={0.85} />
           </mesh>
 
-          {/* Front Cul-de-sac Street & Sidewalk for Destiny's Drop-Off SUV */}
           <group position={[0, 0.0, 15.1]}>
-            {/* Sidewalk along front picket fence */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, -1.75]} receiveShadow>
               <planeGeometry args={[56, 1.35]} />
               <meshStandardMaterial color="#e8e2d5" roughness={0.85} />
             </mesh>
-            {/* Asphalt street */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0.4]} receiveShadow>
               <planeGeometry args={[64, 4.4]} />
               <meshStandardMaterial color="#596273" roughness={0.88} />
             </mesh>
-            {/* Dashed cartoon road centerline */}
             {[-18, -12, -6, 0, 6, 12, 18].map((x) => (
               <mesh key={x} rotation={[-Math.PI / 2, 0, 0]} position={[x, -0.012, 0.4]}>
                 <planeGeometry args={[2.6, 0.16]} />
@@ -136,7 +112,6 @@ export const HeelerHouseAndYard: FC = () => {
             ))}
           </group>
 
-          {/* Kid-Friendly Bouncy Yard Trampoline */}
           <RigidBody
             type="fixed"
             colliders={false}
@@ -144,25 +119,18 @@ export const HeelerHouseAndYard: FC = () => {
             userData={{ isTrampoline: true }}
           >
             <CylinderCollider args={[0.24, TRAMPOLINE_RADIUS]} position={[0, 0.24, 0]} restitution={1.15} />
-            {/* Blue safety pad ring */}
             <mesh position={[0, 0.44, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
               <torusGeometry args={[1.38, 0.18, 14, 32]} />
               <meshStandardMaterial color="#3b8beb" roughness={0.45} />
             </mesh>
-            {/* Dark bouncy mat */}
             <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
               <cylinderGeometry args={[1.32, 1.32, 0.06, 28]} />
               <meshStandardMaterial color="#273043" roughness={0.65} />
             </mesh>
-            {/* 6 sturdy cartoon legs */}
             {[0, 1, 2, 3, 4, 5].map((i) => {
               const ang = (i / 6) * Math.PI * 2;
               return (
-                <mesh
-                  key={i}
-                  position={[Math.cos(ang) * 1.25, 0.21, Math.sin(ang) * 1.25]}
-                  castShadow
-                >
+                <mesh key={i} position={[Math.cos(ang) * 1.25, 0.21, Math.sin(ang) * 1.25]} castShadow>
                   <cylinderGeometry args={[0.055, 0.055, 0.42, 10]} />
                   <meshStandardMaterial color="#6c7a89" roughness={0.4} metalness={0.3} />
                 </mesh>
@@ -170,6 +138,53 @@ export const HeelerHouseAndYard: FC = () => {
             })}
           </RigidBody>
         </>
+      )}
+
+      {currentZone === 'BACKYARD' && (
+        <group position={[0, 0, -16]}>
+          <mesh position={[0, 0.6, -6]} castShadow receiveShadow>
+            <boxGeometry args={[18, 1.2, 0.15]} />
+            <meshStandardMaterial color="#8a6b4f" roughness={0.9} />
+          </mesh>
+          <mesh position={[-9, 0.6, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.15, 1.2, 12]} />
+            <meshStandardMaterial color="#8a6b4f" roughness={0.9} />
+          </mesh>
+          <mesh position={[9, 0.6, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.15, 1.2, 12]} />
+            <meshStandardMaterial color="#8a6b4f" roughness={0.9} />
+          </mesh>
+          <group position={[-5, 0, -2]}>
+            <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
+              <boxGeometry args={[1.4, 1.0, 1.4]} />
+              <meshStandardMaterial color="#c0392b" roughness={0.8} />
+            </mesh>
+            <mesh position={[0, 1.25, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+              <coneGeometry args={[1.1, 0.7, 4]} />
+              <meshStandardMaterial color="#7f8c8d" roughness={0.8} />
+            </mesh>
+          </group>
+          <group position={[4, 0, -2]}>
+            <mesh position={[-1.5, 0.9, 0]} castShadow>
+              <cylinderGeometry args={[0.05, 0.05, 1.8, 8]} />
+              <meshStandardMaterial color="#95a5a6" />
+            </mesh>
+            <mesh position={[1.5, 0.9, 0]} castShadow>
+              <cylinderGeometry args={[0.05, 0.05, 1.8, 8]} />
+              <meshStandardMaterial color="#95a5a6" />
+            </mesh>
+            <mesh position={[0, 1.75, 0]} castShadow>
+              <boxGeometry args={[3, 0.03, 0.03]} />
+              <meshStandardMaterial color="#ecf0f1" />
+            </mesh>
+          </group>
+          {[-2, 0, 2].map((gx, i) => (
+            <mesh key={i} position={[gx, 0.12, 1]} receiveShadow>
+              <boxGeometry args={[1.2, 0.24, 1.2]} />
+              <meshStandardMaterial color="#5d4037" roughness={0.95} />
+            </mesh>
+          ))}
+        </group>
       )}
     </group>
   );

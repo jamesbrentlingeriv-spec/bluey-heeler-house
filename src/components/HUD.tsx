@@ -14,6 +14,7 @@ export const HUD: React.FC = () => {
   const bestStreak = useGameStore((s) => s.bestStreak);
   const soundMuted = useGameStore((s) => s.soundMuted);
   const aiHelpers = useGameStore((s) => s.aiHelpers);
+  const currentZone = useGameStore((s) => s.currentZone);
   const keepyUppyEnabled = useGameStore((s) => s.keepyUppyEnabled);
   const nearDoor = useGameStore((s) => s.nearDoor);
 
@@ -25,6 +26,7 @@ export const HUD: React.FC = () => {
   const openCharacterSelect = useGameStore((s) => s.openCharacterSelect);
   const toggleAiHelpers = useGameStore((s) => s.toggleAiHelpers);
   const toggleKeepyUppy = useGameStore((s) => s.toggleKeepyUppy);
+  const requestZoneChange = useGameStore((s) => s.requestZoneChange);
   const interact = useGameStore((s) => s.interact);
   if (mode !== 'PLAYING' && mode !== 'ARRIVAL_CUTSCENE') return null;
 
@@ -93,19 +95,65 @@ export const HUD: React.FC = () => {
               >
                 🔄 Switch Character
               </button>
-              {nearDoor && (
-                <button
-                  type="button"
-                  className="hud-btn btn-sky"
-                  onClick={interact}
-                  title="Use the nearby doorway"
-                >
-                  {nearDoor === 'BACKYARD'
-                    ? '🌿 Go to Backyard'
-                    : nearDoor === 'INDOOR_HOUSE'
-                      ? '🏠 Enter House'
-                      : '☀️ Go Outside'}
-                </button>
+              {currentZone === 'OUTDOOR_YARD' && (
+                <>
+                  <button
+                    type="button"
+                    className="hud-btn btn-sky"
+                    onClick={() => requestZoneChange('INDOOR_HOUSE')}
+                    title="Walk through the front door"
+                  >
+                    🏠 Enter House
+                  </button>
+                  <button
+                    type="button"
+                    className="hud-btn btn-yellow"
+                    onClick={() => requestZoneChange('BACKYARD')}
+                    title="Head around to the backyard"
+                  >
+                    🌿 Go to Backyard
+                  </button>
+                </>
+              )}
+              {currentZone === 'BACKYARD' && (
+                <>
+                  <button
+                    type="button"
+                    className="hud-btn btn-sky"
+                    onClick={() => requestZoneChange('OUTDOOR_YARD')}
+                    title="Return to the front yard"
+                  >
+                    ☀️ Go to Front Yard
+                  </button>
+                  <button
+                    type="button"
+                    className="hud-btn btn-yellow"
+                    onClick={() => requestZoneChange('INDOOR_HOUSE')}
+                    title="Enter through the back door"
+                  >
+                    🏠 Enter House
+                  </button>
+                </>
+              )}
+              {currentZone === 'INDOOR_HOUSE' && (
+                <>
+                  <button
+                    type="button"
+                    className="hud-btn btn-sky"
+                    onClick={() => requestZoneChange('OUTDOOR_YARD')}
+                    title="Step out the front door"
+                  >
+                    ☀️ Go Outside
+                  </button>
+                  <button
+                    type="button"
+                    className="hud-btn btn-yellow"
+                    onClick={() => requestZoneChange('BACKYARD')}
+                    title="Step out the back door"
+                  >
+                    🌿 Go to Backyard
+                  </button>
+                </>
               )}
               <button
                 type="button"
