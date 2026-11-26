@@ -3,10 +3,6 @@ import { Canvas } from '@react-three/fiber';
 import { Loader } from '@react-three/drei';
 import { Physics } from '@react-three/rapier';
 import { HeelerHouseAndYard } from './components/HeelerHouseAndYard';
-import {
-  BackyardAssetPreloader,
-  HeelerHouseBackyard,
-} from './components/HeelerHouseBackyard';
 import { HeelerHouseInterior } from './components/HeelerHouseInterior';
 import { DropOffCutscene } from './components/DropOffCutscene';
 import { Player } from './components/Player';
@@ -41,12 +37,8 @@ export const App: React.FC = () => {
           <MeEasterEgg />
           <Physics gravity={[0, -16.5, 0]} timeStep="vary">
             <OrbitingCamera />
-            <BackyardAssetPreloader />
             <HeelerHouseAndYard />
             <HeelerHouseInterior />
-            <Suspense fallback={null}>
-              <HeelerHouseBackyard />
-            </Suspense>
             <DropOffCutscene />
             <Player />
             <NpcFamily />

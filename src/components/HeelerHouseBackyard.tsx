@@ -10,7 +10,7 @@ import {
 } from '../constants/zones';
 import { useGameStore } from '../store/gameStore';
 
-const BACKYARD_MODEL_PATH = '/models/environment/heeler_house_backyard.glb';
+const BACKYARD_MODEL_PATH = '/models/environment/backyard.glb';
 const SPRINKLER_POSITION: [number, number, number] = [-3.1, 0, BACKYARD_CENTER_Z - 5];
 
 export const BackyardAssetPreloader: React.FC = () => {

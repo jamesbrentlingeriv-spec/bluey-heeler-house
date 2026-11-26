@@ -3,14 +3,53 @@ import * as THREE from 'three';
 import { Sky, useGLTF } from '@react-three/drei';
 import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier';
 import { useGameStore } from '../store/gameStore';
-import { OUTDOOR_MAT_POSITION } from '../constants/zones';
+import {
+  OUTDOOR_MAT_POSITION,
+  BACKYARD_SCALE,
+  BACKYARD_CENTER_Z,
+} from '../constants/zones';
 
 export const TRAMPOLINE_POSITION: [number, number, number] = [-6.8, 0.0, 7.6];
 export const TRAMPOLINE_RADIUS = 1.55;
 
 /**
+ * The explorable backyard map (backyard.glb, Meshopt-compressed — drei's useGLTF
+ * decodes it). Auto-scaled by BACKYARD_SCALE, floor-aligned to Y=0, centered on
+ * BACKYARD_CENTER_Z, and wrapped in a trimesh collider so its fence/walls are solid.
+ */
+const BackyardMap: React.FC = () => {
+  const { scene } = useGLTF('/models/environment/backyard.glb');
+  const { clone, scale, offset } = useMemo(() => {
+    const c = scene.clone(true);
+    c.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        const m = obj as THREE.Mesh;
+        m.castShadow = true;
+        m.receiveShadow = true;
+      }
+    });
+    const box = new THREE.Box3().setFromObject(c);
+    const s = BACKYARD_SCALE;
+    const centerX = ((box.min.x + box.max.x) / 2) * s;
+    const centerZ = ((box.min.z + box.max.z) / 2) * s;
+    const floorY = box.min.y * s;
+    return { clone: c, scale: s, offset: [-centerX, -floorY, -centerZ] as [number, number, number] };
+  }, [scene]);
+
+  return (
+    <group position={[0, 0, BACKYARD_CENTER_Z]}>
+      <RigidBody type="fixed" colliders="trimesh" friction={0.85} restitution={0.1}>
+        <group scale={[scale, scale, scale]} position={offset}>
+          <primitive object={clone} />
+        </group>
+      </RigidBody>
+    </group>
+  );
+};
+
+/**
  * Outdoor zones: front yard + house + street + trampoline (OUTDOOR_YARD),
- * and a fenced explorable backyard (BACKYARD). The walkable interior is a
+ * and the fenced explorable backyard map (BACKYARD). The walkable interior is a
  * separate map (HeelerHouseInterior) shown when INDOOR_HOUSE.
  */
 export const HeelerHouseAndYard: React.FC = () => {
@@ -64,19 +103,6 @@ export const HeelerHouseAndYard: React.FC = () => {
             shadow-camera-top={22}
             shadow-camera-bottom={-22}
           />
-
-          <RigidBody type="fixed" colliders={false} friction={0.9}>
-            <CuboidCollider args={[45, 0.25, 45]} position={[0, -0.26, 0]} />
-            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, 21.5]} />
-            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, -30]} />
-            <CuboidCollider args={[0.5, 5, 30]} position={[-22, 4, -4]} />
-            <CuboidCollider args={[0.5, 5, 30]} position={[22, 4, -4]} />
-          </RigidBody>
-
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, -4]} receiveShadow>
-            <planeGeometry args={[110, 130]} />
-            <meshStandardMaterial color="#87cf54" roughness={0.92} />
-          </mesh>
         </>
       )}
 
@@ -93,6 +119,19 @@ export const HeelerHouseAndYard: React.FC = () => {
           >
             <planeGeometry args={[2.4, 1.3]} />
             <meshBasicMaterial color="#57d99a" transparent opacity={0.85} />
+          </mesh>
+
+          <RigidBody type="fixed" colliders={false} friction={0.9}>
+            <CuboidCollider args={[45, 0.25, 45]} position={[0, -0.26, 0]} />
+            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, 21.5]} />
+            <CuboidCollider args={[30, 5, 0.5]} position={[0, 4, -11.5]} />
+            <CuboidCollider args={[0.5, 5, 17]} position={[-22, 4, 5]} />
+            <CuboidCollider args={[0.5, 5, 17]} position={[22, 4, 5]} />
+          </RigidBody>
+
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 2]} receiveShadow>
+            <planeGeometry args={[110, 70]} />
+            <meshStandardMaterial color="#87cf54" roughness={0.92} />
           </mesh>
 
           <group position={[0, 0.0, 15.1]}>
@@ -141,50 +180,16 @@ export const HeelerHouseAndYard: React.FC = () => {
       )}
 
       {currentZone === 'BACKYARD' && (
-        <group position={[0, 0, -16]}>
-          <mesh position={[0, 0.6, -6]} castShadow receiveShadow>
-            <boxGeometry args={[18, 1.2, 0.15]} />
-            <meshStandardMaterial color="#8a6b4f" roughness={0.9} />
-          </mesh>
-          <mesh position={[-9, 0.6, 0]} castShadow receiveShadow>
-            <boxGeometry args={[0.15, 1.2, 12]} />
-            <meshStandardMaterial color="#8a6b4f" roughness={0.9} />
-          </mesh>
-          <mesh position={[9, 0.6, 0]} castShadow receiveShadow>
-            <boxGeometry args={[0.15, 1.2, 12]} />
-            <meshStandardMaterial color="#8a6b4f" roughness={0.9} />
-          </mesh>
-          <group position={[-5, 0, -2]}>
-            <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
-              <boxGeometry args={[1.4, 1.0, 1.4]} />
-              <meshStandardMaterial color="#c0392b" roughness={0.8} />
-            </mesh>
-            <mesh position={[0, 1.25, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
-              <coneGeometry args={[1.1, 0.7, 4]} />
-              <meshStandardMaterial color="#7f8c8d" roughness={0.8} />
-            </mesh>
-          </group>
-          <group position={[4, 0, -2]}>
-            <mesh position={[-1.5, 0.9, 0]} castShadow>
-              <cylinderGeometry args={[0.05, 0.05, 1.8, 8]} />
-              <meshStandardMaterial color="#95a5a6" />
-            </mesh>
-            <mesh position={[1.5, 0.9, 0]} castShadow>
-              <cylinderGeometry args={[0.05, 0.05, 1.8, 8]} />
-              <meshStandardMaterial color="#95a5a6" />
-            </mesh>
-            <mesh position={[0, 1.75, 0]} castShadow>
-              <boxGeometry args={[3, 0.03, 0.03]} />
-              <meshStandardMaterial color="#ecf0f1" />
-            </mesh>
-          </group>
-          {[-2, 0, 2].map((gx, i) => (
-            <mesh key={i} position={[gx, 0.12, 1]} receiveShadow>
-              <boxGeometry args={[1.2, 0.24, 1.2]} />
-              <meshStandardMaterial color="#5d4037" roughness={0.95} />
-            </mesh>
-          ))}
-        </group>
+        <>
+          <BackyardMap />
+          {/* Closed-off backyard edges so you can't walk off the map */}
+          <RigidBody type="fixed" colliders={false} friction={0.9}>
+            <CuboidCollider args={[19, 4, 0.6]} position={[0, 2, -34.5]} />
+            <CuboidCollider args={[19, 4, 0.6]} position={[0, 2, -10.5]} />
+            <CuboidCollider args={[0.6, 4, 13]} position={[-19, 2, -22.5]} />
+            <CuboidCollider args={[0.6, 4, 13]} position={[19, 2, -22.5]} />
+          </RigidBody>
+        </>
       )}
     </group>
   );
