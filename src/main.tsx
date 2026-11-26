@@ -3,6 +3,12 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+// Enable MeshoptDecoder globally so drei's <useGLTF> can load Meshopt-compressed
+// GLBs (e.g. backyard.glb). Must run before any <useGLTF> call.
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three-stdlib';
+GLTFLoader.prototype.setMeshoptDecoder(MeshoptDecoder() as any);
+
 // Surface runtime errors on screen (instead of a blank blue screen) so we can
 // debug crashes that happen in the render loop / async work, which React's
 // error boundary alone can't catch.

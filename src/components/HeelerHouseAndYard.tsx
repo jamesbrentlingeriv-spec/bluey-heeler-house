@@ -38,11 +38,15 @@ const BackyardMap: React.FC = () => {
 
   return (
     <group position={[0, 0, BACKYARD_CENTER_Z]}>
-      <RigidBody type="fixed" colliders="trimesh" friction={0.85} restitution={0.1}>
-        <group scale={[scale, scale, scale]} position={offset}>
-          <primitive object={clone} />
-        </group>
+      {/* Ground collider (simple box — fast, no trimesh cooking issues). Top surface at Y=0 matches the floor-aligned backyard GLB. */}
+      <RigidBody type="fixed" colliders={false} friction={0.9}>
+        <CuboidCollider args={[20, 0.1, 20]} position={[0, -0.1, 0]} />
       </RigidBody>
+
+      {/* Backyard visual (Meshopt GLB, floor-aligned to Y=0, no physics mesh — the box collider above handles walking) */}
+      <group scale={[scale, scale, scale]} position={offset}>
+        <primitive object={clone} />
+      </group>
     </group>
   );
 };

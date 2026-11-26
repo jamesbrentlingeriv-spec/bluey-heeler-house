@@ -47,7 +47,7 @@ export const OUTDOOR_PLAYER_SPAWN: [number, number, number] = [0, 0.15, 8.2];
 /** Player spawn near the center of the living room for a clear view of the room. */
 export const INDOOR_PLAYER_SPAWN: [number, number, number] = [0, 0.15, -0.4];
 /** Spawn in the backyard lawn, just beyond the rear doorway. */
-export const BACKYARD_PLAYER_SPAWN: [number, number, number] = [0, 0.15, -20.0];
+export const BACKYARD_PLAYER_SPAWN: [number, number, number] = [0, 0.5, -20.0];
 /** Spawn inside the living room near its rear doorway. */
 export const INDOOR_BACKYARD_SPAWN: [number, number, number] = [0, 0.15, -2.2];
 
