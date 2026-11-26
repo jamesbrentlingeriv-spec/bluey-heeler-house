@@ -1,12 +1,5 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
-import {
-  BACKYARD_HOUSE_DOOR_POSITION,
-  INDOOR_BACKYARD_MAT_POSITION,
-  INDOOR_MAT_POSITION,
-  OUTDOOR_MAT_POSITION,
-} from '../constants/zones';
-import type { ZoneName } from '../types/game';
 
 /**
  * Kid-Friendly Cartoon HUD:
@@ -21,8 +14,6 @@ export const HUD: React.FC = () => {
   const bestStreak = useGameStore((s) => s.bestStreak);
   const soundMuted = useGameStore((s) => s.soundMuted);
   const aiHelpers = useGameStore((s) => s.aiHelpers);
-  const currentZone = useGameStore((s) => s.currentZone);
-  const playerPosition = useGameStore((s) => s.playerPosition);
   const keepyUppyEnabled = useGameStore((s) => s.keepyUppyEnabled);
   const nearDoor = useGameStore((s) => s.nearDoor);
 
@@ -35,33 +26,6 @@ export const HUD: React.FC = () => {
   const toggleAiHelpers = useGameStore((s) => s.toggleAiHelpers);
   const toggleKeepyUppy = useGameStore((s) => s.toggleKeepyUppy);
   const interact = useGameStore((s) => s.interact);
-  const setNearDoor = useGameStore((s) => s.setNearDoor);
-
-  // Only offer door transitions when the player is standing at a doorway.
-  React.useEffect(() => {
-    const [px, , pz] = playerPosition;
-    const doors: Array<{ position: [number, number, number]; target: ZoneName }> =
-      currentZone === 'INDOOR_HOUSE'
-        ? [
-            { position: INDOOR_MAT_POSITION, target: 'OUTDOOR_YARD' },
-            { position: INDOOR_BACKYARD_MAT_POSITION, target: 'BACKYARD' },
-          ]
-        : currentZone === 'BACKYARD'
-          ? [{ position: BACKYARD_HOUSE_DOOR_POSITION, target: 'INDOOR_HOUSE' }]
-          : [{ position: OUTDOOR_MAT_POSITION, target: 'INDOOR_HOUSE' }];
-
-    let nearestDoor: ZoneName | null = null;
-    let nearestDistance = 1.5;
-    for (const door of doors) {
-      const distance = Math.hypot(px - door.position[0], pz - door.position[2]);
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestDoor = door.target;
-      }
-    }
-    setNearDoor(nearestDoor);
-  }, [currentZone, playerPosition, setNearDoor]);
-
   if (mode !== 'PLAYING' && mode !== 'ARRIVAL_CUTSCENE') return null;
 
   return (

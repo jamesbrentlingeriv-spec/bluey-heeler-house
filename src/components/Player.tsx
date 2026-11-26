@@ -7,14 +7,32 @@ import { CharacterAvatar } from './CharacterAvatar';
 import { TRAMPOLINE_POSITION, TRAMPOLINE_RADIUS } from './HeelerHouseAndYard';
 import {
   BACKYARD_ENTRY_Z,
+  BACKYARD_HOUSE_DOOR_POSITION,
   BACKYARD_PLAYER_SPAWN,
   FRONT_YARD_REENTRY_Z,
+  INDOOR_BACKYARD_MAT_POSITION,
+  INDOOR_MAT_POSITION,
   INDOOR_PLAYER_SPAWN,
+  OUTDOOR_MAT_POSITION,
   OUTDOOR_PLAYER_SPAWN,
 } from '../constants/zones';
 import { playJumpSound, playTrampolineBounce } from '../utils/soundEffects';
 import { mobileInput } from '../utils/mobileInput';
-import type { StandardActionKey } from '../types/game';
+import type { StandardActionKey, ZoneName } from '../types/game';
+
+const DOOR_INTERACTION_RANGE = 2.6;
+
+const DOOR_TARGETS: Record<
+  ZoneName,
+  readonly { position: [number, number, number]; target: ZoneName }[]
+> = {
+  OUTDOOR_YARD: [{ position: OUTDOOR_MAT_POSITION, target: 'INDOOR_HOUSE' }],
+  INDOOR_HOUSE: [
+    { position: INDOOR_MAT_POSITION, target: 'OUTDOOR_YARD' },
+    { position: INDOOR_BACKYARD_MAT_POSITION, target: 'BACKYARD' },
+  ],
+  BACKYARD: [{ position: BACKYARD_HOUSE_DOOR_POSITION, target: 'INDOOR_HOUSE' }],
+};
 
 /**
  * Kid-Friendly Third-Person Character Controller:
@@ -34,6 +52,7 @@ export const Player: React.FC = () => {
   const currentZone = useGameStore((s) => s.currentZone);
   const setPlayerPosition = useGameStore((s) => s.setPlayerPosition);
   const setCurrentZone = useGameStore((s) => s.setCurrentZone);
+  const setNearDoor = useGameStore((s) => s.setNearDoor);
   const triggerSpeech = useGameStore((s) => s.triggerSpeech);
   const interact = useGameStore((s) => s.interact);
   const triggerPlayerSwat = useGameStore((s) => s.triggerPlayerSwat);
@@ -79,6 +98,10 @@ export const Player: React.FC = () => {
   }, [activeChar]);
 
   const colliderCenterY = capsuleRadius + capsuleHalfHeight;
+
+  useEffect(() => {
+    if (mode !== 'PLAYING') setNearDoor(null);
+  }, [mode, setNearDoor]);
 
   // Reset player body cleanly when entering gameplay mode or switching characters
   useEffect(() => {
@@ -192,6 +215,17 @@ export const Player: React.FC = () => {
 
     const pos = bodyRef.current.translation();
     const vel = bodyRef.current.linvel();
+
+    let nearestDoor: ZoneName | null = null;
+    let nearestDoorDistance = DOOR_INTERACTION_RANGE;
+    for (const door of DOOR_TARGETS[currentZone]) {
+      const distance = Math.hypot(pos.x - door.position[0], pos.z - door.position[2]);
+      if (distance < nearestDoorDistance) {
+        nearestDoorDistance = distance;
+        nearestDoor = door.target;
+      }
+    }
+    setNearDoor(nearestDoor);
 
     if (currentZone === 'OUTDOOR_YARD' && pos.z < BACKYARD_ENTRY_Z) {
       setCurrentZone('BACKYARD');
